@@ -1,5 +1,3 @@
 library(googleflights)
 set_apikey("AIzaSyBcyOApaEifsmwW1zIaKBIVfw16gGGV4Z8")
-#results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+1, returnDate = Sys.Date() + 8)
-library(readr)
-library(jsonlite)
+#results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+1, returnDate = NULL)
