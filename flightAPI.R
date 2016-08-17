@@ -115,9 +115,7 @@ View(flight.data)
 priceQuery <- sprintf("(%d,'%s','%s','%s')", flight.data$outbound_price , flight.data$Query_time , flight.data$flights_deptime_outbound , flight.data$flights_info_inbound)
 priceQuery <- paste(priceQuery,collapse = ",")
 
-trypriceQuery <- "(110,convert(datetime,'2016-08-17 19:10:48',120),convert(datetime,'2016-08-18 21:05:00',120),'SA2133')"
-
-dbSendQuery(db,"INSERT INTO tb_flights(price,query,departure,flight_code) VALUES(110,'2016-08-17 19:10:48','2016-08-18 21:05:00','SA2133')")
+dbSendQuery(db,str_c("INSERT INTO tb_flights(price,query,departure,flight_code) VALUES ", priceQuery))
 
 
 
