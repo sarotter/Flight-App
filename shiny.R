@@ -2,6 +2,7 @@ library(dplyr)
 library(plotly)
 library(Quandl)
 library(shiny)
+library(shinythemes)
 # ---------------------------------------------------------------------------------------------------------------------
 # SERVER
 # ---------------------------------------------------------------------------------------------------------------------
@@ -13,8 +14,6 @@ server <- function(input, output) {
     input$smooth
     message("Keeping track of smoothing...")
   })
-  stock.data <- reactive({
-    dep.city <- input$dep.city
   stock.data <- eventReactive(input$search, {
     ticker <- input$ticker
     if (!(ticker %in% names(cache))) {
@@ -34,10 +33,10 @@ server <- function(input, output) {
     flightPrice <- price.data()
     p <- plot_ly(flightPrice, x=as.numeric(difftime(date, Sys.Date())), y=price, name = "raw") %>% 
       layout(
-      showLegend = T,
-      xaxis = list(title = "Days to Flight"),
-      yaxis = list(title = "Price")
-    )
+        showLegend = T,
+        xaxis = list(title = "Days to Flight"),
+        yaxis = list(title = "Price")
+      )
   })
   output$stockPlot <- renderPlotly({
     stocks <- stock.data()
@@ -61,10 +60,12 @@ server <- function(input, output) {
 # ---------------------------------------------------------------------------------------------------------------------
 # INTERFACE
 # ---------------------------------------------------------------------------------------------------------------------
+
+
 ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                          tabPanel("Price Watch", fluidPage(
                            titlePanel("Flight Oracle"),
-                          
+                           
                            sidebarPanel(
                              
                              selectInput("origin", "Departure Airport:", 
