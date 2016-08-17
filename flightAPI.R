@@ -123,7 +123,7 @@ trypriceQuery <- "(110,convert(datetime,'2016-08-17 19:10:48',120),convert(datet
 
 dbSendQuery(db,"INSERT INTO tb_flights(price,query,departure,flight_code) VALUES(110,'2016-08-17 19:10:48','2016-08-18 21:05:00','SA2133')")
 dbSendQuery(db, "DROP TABLE tb_flights")
-dbWriteTable(db, "tb_flights", try.data, append = TRUE)
+dbWriteTable(db, "tb_flights", try.data, append = TRUE, row.names = FALSE)
 dbDisconnect(db)
 nrow(dbReadTable(db, "tb_flights"))
 dbListFields(db, "tb_flights")
