@@ -59,7 +59,7 @@ server <- function(input, output) {
 # ---------------------------------------------------------------------------------------------------------------------
 # INTERFACE
 # ---------------------------------------------------------------------------------------------------------------------
-?shinyUI
+
 
 ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                          tabPanel("Price Watch", fluidPage(
