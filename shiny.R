@@ -24,20 +24,19 @@ server <- function(input, output) {
     }
     cache[[ticker]]
   })
-  price.data <- eventReactive(input$search, {
-    destination <- input$arrive
-    origin <- input$origin
-    date <- input$date
-  })
+   price.data <- eventReactive(input$search, {
+   price <- data$price
+   date <- data$departure
+   })
   output$flights <- renderPlotly({
     flightPrice <- price.data()
-    p <- plot_ly(flightPrice, x=as.numeric(difftime(date, Sys.Date())), y=price, name = "raw") %>% 
+    flightPrice <- list(flightPrice)
+    p <- plot_ly(flightPrice, x=date, y=price, name = "raw") %>% 
       layout(
-        showLegend = T,
+        showLegend = F,
         xaxis = list(title = "Days to Flight"),
         yaxis = list(title = "Price")
       )
-    
   })
   output$stockPlot <- renderPlotly({
     stocks <- stock.data()
@@ -90,7 +89,7 @@ ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                              actionButton("search", "Search")
                            ),
                            mainPanel(
-                             plotlyOutput("stockPlot"),
+                             plotlyOutput("flights"),
                              textOutput("recentQuote")
                            )
                          )),
