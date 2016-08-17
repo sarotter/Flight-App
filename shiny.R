@@ -25,7 +25,7 @@ server <- function(input, output) {
     message("Keeping track of smoothing...")
   })
   stock.data <- reactive({
-    ticker <- input$ticker
+    dep.city <- input$dep.city
     if (!(ticker %in% names(cache))) {
       message("Data not in cache. Retrieving now.")
       cache[[ticker]] <<- stocks <- Quandl(paste0("WIKI/", ticker), collapse = "weekly") %>%
@@ -62,10 +62,10 @@ ui <- fluidPage(
   
   sidebarPanel(
     
-    selectInput("city", "Departure Airport:", 
+    selectInput("dep.city", "Departure Airport:", 
                 choices = c("Cape Town (CPT)", "Johannesburg (JNB)")),
     
-    selectInput("city", "Arrival Airport:", 
+    selectInput("arr.city", "Arrival Airport:", 
                 choices = c("Johannesburg (JNB)", "Cape Town (CPT)")),
 
     dateRangeInput("daterange", "Travel Dates:",
