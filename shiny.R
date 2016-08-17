@@ -37,6 +37,7 @@ server <- function(input, output) {
         xaxis = list(title = "Days to Flight"),
         yaxis = list(title = "Price")
       )
+    
   })
   output$stockPlot <- renderPlotly({
     stocks <- stock.data()
