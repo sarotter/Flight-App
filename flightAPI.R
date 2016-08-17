@@ -100,9 +100,6 @@ sapply(1:50, function(x) {
   priceQuery <- paste(priceQuery,collapse = ",")
   dbSendQuery(db,str_c("INSERT INTO tb_flights(price,query,departure,flight_code) VALUES ",priceQuery))
 })
-<<<<<<< HEAD
-View(dbReadTable(db, "tb_flights"))
-=======
 
 
 
@@ -110,4 +107,4 @@ View(dbReadTable(db, "tb_flights"))
 
 
 
->>>>>>> 7b3849f6c825a5ef12091ab2768574e0d37e3ff2
+
