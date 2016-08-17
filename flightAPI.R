@@ -2,14 +2,13 @@ library(googleflights)
 library(jsonlite)
 library(readr)
 library(stringr)
-devtools::install_github("rweyant/googleflights")
 library(googleflights)
 
 Hashim.key <- "AIzaSyAcJIcRVze_Bq0sHQ4uO3rV6eUEUpi8nVk"
 Saul.key <- "AIzaSyBcyOApaEifsmwW1zIaKBIVfw16gGGV4Z8"
 set_apikey(Saul.key)
 
-results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+1, returnDate = Sys.Date() + 8)
+#results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+1, returnDate = Sys.Date() + 8)
 results.json
 results.json <- toJSON(results)
 
@@ -106,8 +105,12 @@ flight.data <- data.frame(outbound_price = outbound_price,
                          flights_deptime_inbound = flights_deptime_inbound,
                          Query_time = Sys.time()) 
 View(flight.data)
-
-
+try.data <- data.frame(
+                       outbound_price = outbound_price, 
+                       Query_time = as.character(Sys.time()), 
+                       flights_deptime_outbound = as.character(flights_deptime_outbound), 
+                       flights_info_outbound = flights_info_outbound)
+View(try.data)
 
 #dbSendQuery(db,"INSERT INTO tb_flights VALUES()")
 
@@ -118,7 +121,8 @@ priceQuery <- paste(priceQuery,collapse = ",")
 trypriceQuery <- "(110,convert(datetime,'2016-08-17 19:10:48',120),convert(datetime,'2016-08-18 21:05:00',120),'SA2133')"
 
 dbSendQuery(db,"INSERT INTO tb_flights(price,query,departure,flight_code) VALUES(110,'2016-08-17 19:10:48','2016-08-18 21:05:00','SA2133')")
-
-
-
-
+dbSendQuery(db, "DROP TABLE tb_flights")
+dbWriteTable(db, "tb_flights", try.data, append = TRUE)
+dbDisconnect(db)
+nrow(dbReadTable(db, "tb_flights"))
+dbListFields(db, "tb_flights")
