@@ -43,7 +43,11 @@ flights_deptime_outbound <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$slice[[1]]$segment[[1]]$leg[[1]]$departureTime
 })
 
-flights_deptime_outbound <- as.POSIXct(flights_deptime_outbound)
+flights_deptime_outbound <- sapply(1:length(flights_deptime_outbound), function(x) {gsub("[[:alpha:]]","", flights_deptime_outbound[x])})
+flights_deptime_outbound <- sapply(1:length(flights_deptime_outbound), function(x) {gsub("[-,:]","", flights_deptime_outbound[x])})
+flights_deptime_outbound <- sapply(1:length(flights_deptime_outbound), function(x) {gsub("[[:punct:]].*","", flights_deptime_outbound[x])})
+
+flights_deptime_outbound <- as.POSIXct(flights_deptime_outbound, format = "%Y%m%d%H%M")
 
 
 
@@ -59,7 +63,12 @@ flights_deptime_inbound <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$slice[[2]]$segment[[1]]$leg[[1]]$departureTime
 })
 
-flights_deptime_inbound <- as.POSIXct(flights_deptime_inbound)
+flights_deptime_inbound <- sapply(1:length(flights_deptime_inbound), function(x) {gsub("[[:alpha:]]","", flights_deptime_inbound[x])})
+flights_deptime_inbound <- sapply(1:length(flights_deptime_inbound), function(x) {gsub("[-,:]","", flights_deptime_inbound[x])})
+flights_deptime_inbound <- sapply(1:length(flights_deptime_inbound), function(x) {gsub("[[:punct:]].*","", flights_deptime_inbound[x])})
+
+flights_deptime_inbound <- as.POSIXct(flights_deptime_inbound, format = "%Y%m%d%H%M")
+
 
 
 fareCalculation <- sapply(1:n, function(x){
@@ -90,16 +99,17 @@ results.db <- data.frame(outbound_price = outbound_price,
                          inbound_price = inbound_price,
                          flights_carrier_inbound = flights_carrier_inbound,
                          flights_code_inbound = flights_code_inbound,
-                         flights_deptime_inbound = flights_deptime_inbound) 
+                         flights_deptime_inbound = flights_deptime_inbound,
+                         Query_time = Sys.time()) 
 
 dbSendQuery(db,"INSERT INTO tb_flights VALUES()")
 
+unique(flights_code_outbound)
 
 View(results.db)
 class(results.db)
 
-#str_c("data", Sys.Date(), "@",Sys.time(),".txt")
-#write_csv(results.db, str_c)
+
 
 
 
