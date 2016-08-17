@@ -75,6 +75,8 @@ fareCalculation <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$pricing[[1]]$fareCalculation
 })
 
+<<<<<<< HEAD
+=======
 outbound_price <- sapply(1:length(fareCalculation), function(x) {
   numbers = regmatches(fareCalculation[x], gregexpr("[[:digit:]]+", fareCalculation[x]))
   out.price <- str_c(numbers[[1]][1],".",numbers[[1]][2])
@@ -115,3 +117,4 @@ class(results.db)
 
 
 
+>>>>>>> 4851f214fa3d38a133ef95b72c9efed2655c4df9
