@@ -104,13 +104,14 @@ flight.data <- data.frame(outbound_price = outbound_price,
                          flights_info_inbound = flights_info_inbound,
                          flights_deptime_inbound = flights_deptime_inbound,
                          Query_time = Sys.time()) 
-View(flight.data)
+
+#data frame in the order to push to the SQL table
 try.data <- data.frame(
                        outbound_price = outbound_price, 
                        Query_time = as.character(Sys.time()), 
                        flights_deptime_outbound = as.character(flights_deptime_outbound), 
                        flights_info_outbound = flights_info_outbound)
-View(try.data)
+
 
 #dbSendQuery(db,"INSERT INTO tb_flights VALUES()")
 
