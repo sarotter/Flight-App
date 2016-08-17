@@ -33,10 +33,10 @@ server <- function(input, output) {
     flightPrice <- price.data()
     p <- plot_ly(flightPrice, x=as.numeric(difftime(date, Sys.Date())), y=price, name = "raw") %>% 
       layout(
-      showLegend = T,
-      xaxis = list(title = "Days to Flight"),
-      yaxis = list(title = "Price")
-    )
+        showLegend = T,
+        xaxis = list(title = "Days to Flight"),
+        yaxis = list(title = "Price")
+      )
   })
   output$stockPlot <- renderPlotly({
     stocks <- stock.data()
@@ -65,7 +65,7 @@ server <- function(input, output) {
 ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                          tabPanel("Price Watch", fluidPage(
                            titlePanel("Flight Oracle"),
-                          
+                           
                            sidebarPanel(
                              
                              selectInput("origin", "Departure Airport:", 
