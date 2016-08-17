@@ -24,13 +24,10 @@ server <- function(input, output) {
     input$smooth
     message("Keeping track of smoothing...")
   })
-<<<<<<< HEAD
   stock.data <- reactive({
     dep.city <- input$dep.city
-=======
   stock.data <- eventReactive(input$search, {
     ticker <- input$ticker
->>>>>>> 8ff630f16e0ee4e8d60257d5f8aa2747e235bdb9
     if (!(ticker %in% names(cache))) {
       message("Data not in cache. Retrieving now.")
       cache[[ticker]] <<- stocks <- Quandl(paste0("WIKI/", ticker), collapse = "weekly") %>%
@@ -77,7 +74,6 @@ server <- function(input, output) {
 # ---------------------------------------------------------------------------------------------------------------------
 ?shinyUI
 
-<<<<<<< HEAD
 ui <- fluidPage(
   titlePanel("Flight Oracle"),
   
@@ -88,7 +84,6 @@ ui <- fluidPage(
     
     selectInput("arr.city", "Arrival Airport:", 
                 choices = c("Johannesburg (JNB)", "Cape Town (CPT)")),
-=======
 ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                          tabPanel("Price Watch", fluidPage(
                            titlePanel("Flight Oracle"),
@@ -123,7 +118,6 @@ ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                          tabPanel("Airline Comparison"),
                          tags$h3(class="header")
 ))
->>>>>>> 8ff630f16e0ee4e8d60257d5f8aa2747e235bdb9
 
 
 
