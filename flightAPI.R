@@ -97,6 +97,16 @@ flights_deptime_inbound <- as.POSIXct(flights_deptime_inbound, format = "%Y%m%d%
 
 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+outbound_price <- sapply(1:length(fareCalculation), function(x) {
+  numbers = regmatches(fareCalculation[x], gregexpr("[[:digit:]]+", fareCalculation[x]))
+  out.price <- str_c(numbers[[1]][1],".",numbers[[1]][2])
+  as.integer(out.price)
+})
+>>>>>>> 8ff630f16e0ee4e8d60257d5f8aa2747e235bdb9
 
 
 
@@ -146,3 +156,4 @@ class(results.db)
 
 
 
+>>>>>>> 4851f214fa3d38a133ef95b72c9efed2655c4df9
