@@ -3,14 +3,16 @@ library(jsonlite)
 library(readr)
 library(stringr)
 devtools::install_github("rweyant/googleflights")
+library(googleflights)
+
 Hashim.key <- "AIzaSyAcJIcRVze_Bq0sHQ4uO3rV6eUEUpi8nVk"
 Saul.key <- "AIzaSyBcyOApaEifsmwW1zIaKBIVfw16gGGV4Z8"
 set_apikey(Saul.key)
+
 #results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+1, returnDate = Sys.Date() + 8)
-
 results.json
-
 results.json <- toJSON(results)
+
 
 n <- 200
 
@@ -41,6 +43,9 @@ flights_deptime_outbound <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$slice[[1]]$segment[[1]]$leg[[1]]$departureTime
 })
 
+flights_deptime_outbound <- as.POSIXct(flights_deptime_outbound)
+
+
 
 flights_carrier_inbound <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$slice[[2]]$segment[[1]]$flight$carrier
@@ -54,21 +59,44 @@ flights_deptime_inbound <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$slice[[2]]$segment[[1]]$leg[[1]]$departureTime
 })
 
+flights_deptime_inbound <- as.POSIXct(flights_deptime_inbound)
+
+
 fareCalculation <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$pricing[[1]]$fareCalculation
 })
 
+outbound_price <- sapply(1:length(fareCalculation), function(x) {
+  numbers = regmatches(fareCalculation[x], gregexpr("[[:digit:]]+", fareCalculation[x]))
+  out.price <- str_c(numbers[[1]][1],".",numbers[[1]][2])
+  as.integer(out.price)
+})
+
+
+inbound_price <- sapply(1:length(fareCalculation), function(x) {
+  numbers = regmatches(fareCalculation[x], gregexpr("[[:digit:]]+", fareCalculation[x]))
+  ifelse(numbers[[1]][3] == "1",
+         in.price <- str_c(numbers[[1]][4]),
+         in.price <- str_c(numbers[[1]][3]))
+  as.integer(in.price)
+})
+
+
 # create the dataframe
-results.db <- data.frame(round_trip_price = flights_price_roundtrip,
+results.db <- data.frame(outbound_price = outbound_price,
                          flights_carrier_outbound = flights_carrier_outbound,
                          flights_code_outbound = flights_code_outbound,
                          flights_deptime_outbound = flights_deptime_outbound,
+                         inbound_price = inbound_price,
                          flights_carrier_inbound = flights_carrier_inbound,
                          flights_code_inbound = flights_code_inbound,
                          flights_deptime_inbound = flights_deptime_inbound) 
 
+dbSendQuery(db,"INSERT INTO tb_flights VALUES()")
+
 
 View(results.db)
+class(results.db)
 
 #str_c("data", Sys.Date(), "@",Sys.time(),".txt")
 #write_csv(results.db, str_c)
