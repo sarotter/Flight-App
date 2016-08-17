@@ -9,7 +9,7 @@ Hashim.key <- "AIzaSyAcJIcRVze_Bq0sHQ4uO3rV6eUEUpi8nVk"
 Saul.key <- "AIzaSyBcyOApaEifsmwW1zIaKBIVfw16gGGV4Z8"
 set_apikey(Saul.key)
 
-#results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+1, returnDate = Sys.Date() + 8)
+results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+1, returnDate = Sys.Date() + 8)
 results.json
 results.json <- toJSON(results)
 
@@ -109,34 +109,15 @@ View(flight.data)
 
 
 
-dbSendQuery(db,"INSERT INTO tb_flights VALUES()")
-flights <- dbReadTable(db,"tb_flights")
-
-head(flights)
-sapply(1:nrow(results.db), function(x) {
-  code <- results.db[x,"flights_code_outbound"]
-  print(code)
-  carrier <- results.db[x,"flights_carrier_outbound"]
-  print(carrier)
-  flights[flights$flight_code== code & flights$carrier== carrier,1]
-})
-
-priceQuery <- sprintf("(%d,'%s')", results.db$outbound_price,results.db$Query_time, results.db$flights_deptime_outbound)
+#dbSendQuery(db,"INSERT INTO tb_flights VALUES()")
 
 
-dbSendQuery(conn = db,
-            "CREATE TABLE tb_flight_prices
-            (id INTEGER PRIMARY KEY AUTOINCREMENT,
-            flight_ID INTEGER,
-            price INTEGER,
-            query DATETIME,
-            departure DATETIME,
-            FOREIGN KEY (flight_id) REFERENCES flights(flight_id)
-            )")
-unique(flights_code_outbound)
+priceQuery <- sprintf("(%d,'%s','%s','%s')", flight.data$outbound_price , flight.data$Query_time , flight.data$flights_deptime_outbound , flight.data$flights_info_inbound)
+priceQuery <- paste(priceQuery,collapse = ",")
 
-View(results.db)
-class(results.db)
+trypriceQuery <- "(110,convert(datetime,'2016-08-17 19:10:48',120),convert(datetime,'2016-08-18 21:05:00',120),'SA2133')"
+
+dbSendQuery(db,"INSERT INTO tb_flights(price,query,departure,flight_code) VALUES(110,convert(datetime,'2016-08-17 19:10:48',120),convert(datetime,'2016-08-18 21:05:00',120),'SA2133')")
 
 
 
