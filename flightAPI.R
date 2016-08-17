@@ -2,9 +2,6 @@ library(googleflights)
 library(jsonlite)
 library(readr)
 set_apikey("AIzaSyBcyOApaEifsmwW1zIaKBIVfw16gGGV4Z8")
-<<<<<<< HEAD
-#results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+1, returnDate = NULL)
-=======
 #results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+1, returnDate = Sys.Date() + 8)
 
 
@@ -50,8 +47,3 @@ fareCalculation <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$pricing[[1]]$fareCalculation
 })
 
-
-
-
-
->>>>>>> dc81064608b69a9944709aea19987e418a97a7bd

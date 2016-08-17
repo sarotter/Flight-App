@@ -24,7 +24,7 @@ server <- function(input, output) {
     input$smooth
     message("Keeping track of smoothing...")
   })
-  stock.data <- reactive({
+  stock.data <- eventReactive(input$search, {
     ticker <- input$ticker
     if (!(ticker %in% names(cache))) {
       message("Data not in cache. Retrieving now.")
@@ -33,6 +33,20 @@ server <- function(input, output) {
         dplyr::select(date, adj_close)
     }
     cache[[ticker]]
+  })
+  price.data <- eventReactive(input$search, {
+    destination <- input$arrive
+    origin <- input$origin
+    date <- input$date
+  })
+  output$flights <- renderPlotly({
+    flightPrice <- price.data()
+    p <- plot_ly(flightPrice, x=as.numeric(difftime(date, Sys.Date())), y=price, name = "raw") %>% 
+      layout(
+      showLegend = T,
+      xaxis = list(title = "Days to Flight"),
+      yaxis = list(title = "Price")
+    )
   })
   output$stockPlot <- renderPlotly({
     stocks <- stock.data()
@@ -56,41 +70,45 @@ server <- function(input, output) {
 # ---------------------------------------------------------------------------------------------------------------------
 # INTERFACE
 # ---------------------------------------------------------------------------------------------------------------------
+?shinyUI
 
-ui <- fluidPage(
-  titlePanel("Flight Oracle"),
-  
-  sidebarPanel(
-    
-    selectInput("city", "Departure Airport:", 
-                choices = c("Cape Town (CPT)", "Johannesburg (JNB)")),
-    
-    selectInput("city", "Arrival Airport:", 
-                choices = c("Johannesburg (JNB)", "Cape Town (CPT)")),
+ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
+                         tabPanel("Price Watch", fluidPage(
+                           titlePanel("Flight Oracle"),
+                          
+                           sidebarPanel(
+                             
+                             selectInput("origin", "Departure Airport:", 
+                                         choices = c("Cape Town (CPT)", "Johannesburg (JNB)")),
+                             
+                             selectInput("destination", "Arrival Airport:", 
+                                         choices = c("Johannesburg (JNB)", "Cape Town (CPT)")),
+                             
+                             dateInput("date", "Travel Date:",
+                                       value = Sys.Date()
+                             ),
+                             selectInput("ticker", "Stock", width = NULL,
+                                         choices = c("AAPL", "AMD", "RDEN", "REV", "CYTK", "REXI", "CMA")
+                             ),
+                             checkboxInput("smooth", "Smooth", value = TRUE),
+                             # Display this only if smoothing is activated.
+                             conditionalPanel(
+                               condition = "input.smooth == true",
+                               sliderInput("span", "Smoother Span", min = 0, max = 1, value = 0.5)
+                             ),
+                             actionButton("search", "Search")
+                           ),
+                           mainPanel(
+                             plotlyOutput("stockPlot"),
+                             textOutput("recentQuote")
+                           )
+                         )),
+                         tabPanel("Airline Comparison"),
+                         tags$h3(class="header")
+))
 
-    dateRangeInput("daterange", "Travel Dates:",
-                   start  = Sys.Date() - 7,
-                   end    = Sys.Date() + 7,
-                   format = "mm/dd/yy",
-                   separator = " - "),
-    
-    
-    selectInput("ticker", "Stock", width = NULL,
-                choices = c("AAPL", "AMD", "RDEN", "REV", "CYTK", "REXI", "CMA")
-    ),
-    checkboxInput("smooth", "Smooth", value = TRUE),
-    # Display this only if smoothing is activated.
-    conditionalPanel(
-      condition = "input.smooth == true",
-      sliderInput("span", "Smoother Span", min = 0, max = 1, value = 0.5)
-    )
-  ),
-  mainPanel(
-    plotlyOutput("stockPlot"),
-    textOutput("recentQuote")
-  )
-)
+
+
 
 # ---------------------------------------------------------------------------------------------------------------------
-
 shinyApp(ui = ui, server = server)
