@@ -61,18 +61,6 @@ server <- function(input, output) {
 # ---------------------------------------------------------------------------------------------------------------------
 # INTERFACE
 # ---------------------------------------------------------------------------------------------------------------------
-?shinyUI
-
-ui <- fluidPage(
-  titlePanel("Flight Oracle"),
-  
-  sidebarPanel(
-    
-    selectInput("dep.city", "Departure Airport:", 
-                choices = c("Cape Town (CPT)", "Johannesburg (JNB)")),
-    
-    selectInput("arr.city", "Arrival Airport:", 
-                choices = c("Johannesburg (JNB)", "Cape Town (CPT)")),
 ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                          tabPanel("Price Watch", fluidPage(
                            titlePanel("Flight Oracle"),
