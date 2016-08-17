@@ -43,6 +43,9 @@ flights_deptime_outbound <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$slice[[1]]$segment[[1]]$leg[[1]]$departureTime
 })
 
+flights_deptime_outbound <- as.POSIXct(flights_deptime_outbound)
+
+
 
 flights_carrier_inbound <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$slice[[2]]$segment[[1]]$flight$carrier
@@ -55,6 +58,9 @@ flights_code_inbound <- sapply(1:n, function(x){
 flights_deptime_inbound <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$slice[[2]]$segment[[1]]$leg[[1]]$departureTime
 })
+
+flights_deptime_inbound <- as.POSIXct(flights_deptime_inbound)
+
 
 fareCalculation <- sapply(1:n, function(x){
   results$trips$tripOption[[x]]$pricing[[1]]$fareCalculation
@@ -86,9 +92,12 @@ results.db <- data.frame(outbound_price = outbound_price,
                          flights_code_inbound = flights_code_inbound,
                          flights_deptime_inbound = flights_deptime_inbound) 
 
+dbSendQuery(db,"INSERT INTO tb_flights VALUES()")
+
 
 View(results.db)
 class(results.db)
+
 #str_c("data", Sys.Date(), "@",Sys.time(),".txt")
 #write_csv(results.db, str_c)
 
