@@ -6,6 +6,7 @@ library(mlbench)
 library(rpart)
 library(ipred)
 library(e1071)
+library(rattle)
 library(vcdExtra)
 
 theme_set(theme_minimal())
@@ -16,7 +17,6 @@ flights_data <- dbReadTable(db, "tb_flights")
 flights_data <- flights_data %>% mutate (
   query = as.POSIXct(query),
   departure = as.POSIXct(departure),
-<<<<<<< HEAD
   until_departure = as.double(departure - query),
   departure_date = as.Date(departure))
   sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
@@ -28,28 +28,15 @@ flights_data <- flights_data %>% mutate (
   ba_cheapest <- ba_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
                                                                        mean = mean(price),
                                                                        median = median(price),
-                                                                       mean_until_departure = mean(until_departure/24)) 
-=======
+
   departure_date = factor(as.Date(departure)),
   until_departure = as.double(departure - query))
 
 # get the cheapest flight everyday
->>>>>>> 9d76cd20d1b1eaa330b6da36392e3e38d1ddbb7b
 cheapest <- flights_data %>% group_by(departure_date) %>% dplyr::summarize(
   min_price = min(price), mean_price = mean(price), median_price = median(price), mean_until_departure = mean(until_departure/24)
 )
 
-# divide the cheapest data fram by each airline
-sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
-ba_flights <- flights_data[substr(flights_data$flight_code,1,2)=="BA",]
-sa_cheapest <- ba_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
-                                                                     mean = mean(price),
-                                                                     median = median(price),
-                                                                     mean_until_departure = mean(until_departure/24)) 
-ba_cheapest <- sa_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
-                                                                     mean = mean(price),
-                                                                     median = median(price),
-                                                                     mean_until_departure = mean(until_departure/24)) 
 
 # linear regression model
 (flights.lm <- train(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, method = "lm"))
@@ -103,24 +90,8 @@ try.frame <- data.frame(
 
 cheapest_prediction  <- cheapest
 
-<<<<<<< HEAD
 
-sapply(1:50, function(x) {
-  departure_date_prediction[x] = cheapest_prediction[50,1]
-  min_price_prediction[x] = min(cheapest_prediction$min_price)
-  cheapest_prediction[50+x,2] = min(cheapest_prediction$min_price)
-  cheapest_prediction[50+x,3] = mean(cheapest_prediction$mean_price)
-  cheapest_prediction[50+x,5] = 50 + x
-  cheapest_prediction[50+x,4] = predict(flights.svm, cheapest_prediction[50 + x,])
-})
-cheapest_prediction[51,1] = cheapest_prediction[50,1]
-cheapest_prediction[51,2] = min(cheapest_prediction$min_price)
-head(cheapest_prediction)
 
-#PREDICTIONS SA
-sa.rpart <- train(median ~ ., data = sa_cheapest, method = "rpart")
-
-=======
 # sapply(1:50, function(x) {
 #   departure_date_prediction[x] = cheapest_prediction[50,1]
 #   min_price_prediction[x] = min(cheapest_prediction$min_price)
@@ -132,4 +103,21 @@ sa.rpart <- train(median ~ ., data = sa_cheapest, method = "rpart")
 # cheapest_prediction[51,1] = cheapest_prediction[50,1]
 # cheapest_prediction[51,2] = min(cheapest_prediction$min_price)
 # head(cheapest_prediction)
->>>>>>> 9d76cd20d1b1eaa330b6da36392e3e38d1ddbb7b
+
+
+
+#PREDICTIONS BY AIRLINE
+# divide the cheapest data fram by each airline
+sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
+ba_flights <- flights_data[substr(flights_data$flight_code,1,2)=="BA",]
+sa_cheapest <- ba_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
+                                                                     mean = mean(price),
+                                                                     median = median(price),
+                                                                     mean_until_departure = mean(until_departure/24)) 
+ba_cheapest <- sa_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
+                                                                     mean = mean(price),
+                                                                     median = median(price),
+                                                                     mean_until_departure = mean(until_departure/24)) 
+
+sa.rpart <- train(median ~ ., data = sa_cheapest, method = "rpart")
+
