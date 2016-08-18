@@ -23,9 +23,6 @@ cheapest<-flights_data %>% group_by(departure_date) %>% summarise(min = min(pric
                                                         median = median(price),
                                                         mean_until_departure = mean(until_departure/24)) 
 
-  departure_date = factor(as.Date(departure)),
-  until_departure = as.double(departure - query))
-
 
 cheapest <- flights_data %>% group_by(departure_date) %>% dplyr::summarize(
   min_price = min(price), mean_price = mean(price), median_price = median(price), mean_until_departure = mean(until_departure/24)
