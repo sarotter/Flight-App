@@ -16,6 +16,7 @@ flights_data <- dbReadTable(db, "tb_flights")
 flights_data <- flights_data %>% mutate (
   query = as.POSIXct(query),
   departure = as.POSIXct(departure),
+<<<<<<< HEAD
   until_departure = as.double(departure - query),
   departure_date = as.Date(departure))
   sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
@@ -28,12 +29,39 @@ flights_data <- flights_data %>% mutate (
                                                                        mean = mean(price),
                                                                        median = median(price),
                                                                        mean_until_departure = mean(until_departure/24)) 
+=======
+  departure_date = factor(as.Date(departure)),
+  until_departure = as.double(departure - query))
+
+# get the cheapest flight everyday
+>>>>>>> 9d76cd20d1b1eaa330b6da36392e3e38d1ddbb7b
 cheapest <- flights_data %>% group_by(departure_date) %>% dplyr::summarize(
   min_price = min(price), mean_price = mean(price), median_price = median(price), mean_until_departure = mean(until_departure/24)
 )
 
-# decision tree
-(flights.rpart <- train(median_price ~ ., data = cheapest, method = "rpart"))
+# divide the cheapest data fram by each airline
+sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
+ba_flights <- flights_data[substr(flights_data$flight_code,1,2)=="BA",]
+sa_cheapest <- ba_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
+                                                                     mean = mean(price),
+                                                                     median = median(price),
+                                                                     mean_until_departure = mean(until_departure/24)) 
+ba_cheapest <- sa_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
+                                                                     mean = mean(price),
+                                                                     median = median(price),
+                                                                     mean_until_departure = mean(until_departure/24)) 
+
+# linear regression model
+(flights.lm <- train(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, method = "lm"))
+summary(flights.lm)
+predict(flights.lm)
+points.ci <- predict(flights.lm, interval = "confidence", level = 0.95)
+points.pi <- predict(flights.lm, interval = "prediction", level = 0.95)
+
+test.accuracy(predict(flights.lm, cheapest))
+
+# decision tree model
+(flights.rpart <- train(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, method = "rpart"))
 
 test.accuracy <- function(prediction) {
   sum(prediction >= cheapest$median_price - 30 & prediction <= cheapest$median_price + 30) / nrow(cheapest)
@@ -45,23 +73,23 @@ fancyRpartPlot(flights.rpart$finalModel)
 #
 test.accuracy(predict(flights.rpart, cheapest))
 
-# bagging 
-(flights.bagging <- bagging(median_price ~ ., data = cheapest, coob = TRUE, nbagg = 50))
+# bagging model
+(flights.bagging <- bagging(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, coob = TRUE, nbagg = 50))
 
 test.accuracy(predict(flights.bagging, cheapest))
 
-# random forest
-(flights.forest <- train(median_price ~ mean_until_departure, data = cheapest, method = "rf", ntree = 100,
+# random forest model
+(flights.forest <- train(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, method = "rf", ntree = 100,
                           tuneGrid = expand.grid(mtry = 2^(1:3))))
 
 test.accuracy(predict(flights.forest, cheapest))
 
-# Naive Bayes
+# Naive Bayes model
 TRAINCONTROL = trainControl(method = "cv")
-(flights.nb <- train(median_price ~ mean_until_departure, data = cheapest, method = "nb", trControl = TRAINCONTROL))
+(flights.nb <- train(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, method = "nb", trControl = TRAINCONTROL))
 
 # SVM
-(flights.svm <- train(median_price ~min_price + mean_price +mean_until_departure , data = cheapest, method = "svmRadial",
+(flights.svm <- train(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, method = "svmRadial",
                       trControl = trainControl(method = "cv")))
 test.accuracy(predict(flights.svm, cheapest))
 
@@ -75,6 +103,7 @@ try.frame <- data.frame(
 
 cheapest_prediction  <- cheapest
 
+<<<<<<< HEAD
 
 sapply(1:50, function(x) {
   departure_date_prediction[x] = cheapest_prediction[50,1]
@@ -91,3 +120,16 @@ head(cheapest_prediction)
 #PREDICTIONS SA
 sa.rpart <- train(median ~ ., data = sa_cheapest, method = "rpart")
 
+=======
+# sapply(1:50, function(x) {
+#   departure_date_prediction[x] = cheapest_prediction[50,1]
+#   min_price_prediction[x] = min(cheapest_prediction$min_price)
+#   cheapest_prediction[50+x,2] = min(cheapest_prediction$min_price)
+#   cheapest_prediction[50+x,3] = mean(cheapest_prediction$mean_price)
+#   cheapest_prediction[50+x,5] = 50 + x
+#   cheapest_prediction[50+x,4] = predict(flights.svm, cheapest_prediction[50 + x,])
+# })
+# cheapest_prediction[51,1] = cheapest_prediction[50,1]
+# cheapest_prediction[51,2] = min(cheapest_prediction$min_price)
+# head(cheapest_prediction)
+>>>>>>> 9d76cd20d1b1eaa330b6da36392e3e38d1ddbb7b
