@@ -79,10 +79,25 @@ ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                              plotlyOutput("flights")
                            )
                          )),
-                         tabPanel("Airline Comparison",
-                                  mainPanel(textOutput("recentQuote")),
-                         tags$h3(class="header")
-)))
+                         tabPanel("Price Alert",fluidPage(
+                           titlePanel("Price Alert"), 
+                           
+                           p("Receive alerts when you desired flight drops below a certain price"),
+                           
+                           fluidRow(column(6,textInput("text", label = h3("Email"), value = "Enter Email")),
+                                    
+                                    column(6,sliderInput("slider2", label = h3("Price Range"), min = 0, 
+                                                         max = 1500, value = c(40, 60)))),
+                           
+                           fluidRow(column(6,checkboxGroupInput("checkGroup", label = h3("Carrier"),inline=TRUE,
+                                                                choices = list("BA" = 1, "SA" = 2),
+                                                                selected = 1)),
+                                    
+                                    column(6,dateInput("date", label = h3("Flight Date"), value = "2014-01-01"))),
+                           actionButton("action", label = "Set Alert")
+                           
+                         ))))
+
 
 
 
