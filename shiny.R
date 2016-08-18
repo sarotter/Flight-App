@@ -3,59 +3,91 @@ library(plotly)
 library(Quandl)
 library(shiny)
 library(shinythemes)
+library(DT)
 # ---------------------------------------------------------------------------------------------------------------------
 # SERVER
 # ---------------------------------------------------------------------------------------------------------------------
 
-cache = list()
-
 server <- function(input, output) {
-  observe({
-    input$smooth
-    message("Keeping track of smoothing...")
+  airlinesInput <- reactive({
+    switch(input$airlines,
+           "BA" = ba_shiny,
+           "SA" = sa_shiny,
+           "Both" = both_shiny)
   })
-   price.data <- eventReactive(input$search, {
-    price <- cheapest$price
-    date <- cheapest$departure_date
+  
+  price.data <- eventReactive(input$search, {
+    price <- data$price
+    date <- data$departure_date
+  })
+   
+   # Show the first "n" observations
+   output$view <- renderTable({
+     flight <- price.data()
+       date <- input$date
+     sorted <- airlinesInput()
+     head(sorted %>% filter(departure_date == date), n = 5)
    })
    
-  output$flights <- renderPlotly({
-    flightPrice <- price.data()
-    if(input$airlines == "SA") {
-      p <- plot_ly(sa_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
-        layout(
-          showLegend = F,
-          xaxis = list(title = "Departure Date"),
-          yaxis = list(title = "Price")
-        )
-    }
-    else if(input$airlines == "BA") {
-      p <- plot_ly(ba_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
-        layout(
-          showLegend = F,
-          xaxis = list(title = "Departure Date"),
-          yaxis = list(title = "Price")
-        )
-    }
-    else {
-    p <- plot_ly(cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
-      layout(
-        showLegend = F,
-        xaxis = list(title = "Departure Date"),
-        yaxis = list(title = "Price")
-      )
-    }
-  })
-  output$recentQuote <- renderText({
-    print('COMING SOON')
-  })
+   output$flights <- renderPlotly({
+     flightPrice <- price.data()
+     if(input$airlines == "SA") {
+       p <- plot_ly(sa_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+         layout(
+           showLegend = F,
+           xaxis = list(title = "Departure Date"),
+           yaxis = list(title = "Price")
+         )
+     }
+     else if(input$airlines == "BA") {
+       p <- plot_ly(ba_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+         layout(
+           showLegend = F,
+           xaxis = list(title = "Departure Date"),
+           yaxis = list(title = "Price")
+         )
+     }
+     else {
+       p <- plot_ly(cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+         layout(
+           showLegend = F,
+           xaxis = list(title = "Departure Date"),
+           yaxis = list(title = "Price")
+         )
+     }
+   })
+   send.mail <- eventReactive(input$action, {
+     if(input$carriers == "BA" & ba_cheapest[input$date2,]$min_price <= input$slider2) {
+       from <- isolate('saul.rotter@gmail.com')
+       to <- isolate(input$email)
+       subject <- "FLIGHT TO JOHANNESBURG"
+       msg <- str_c("Your flight to JNB has fallen to ", input$slider2, " you should buy it now.")
+       sendmail(from, to, subject, msg)
+     }
+     else if(input$carriers == "SA" & sa_cheapest[input$date2,]$min_price <= input$slider2) {
+       from <- isolate('saul.rotter@gmail.com')
+       to <- isolate(input$email)
+       subject <- "FLIGHT TO JOHANNESBURG"
+       msg <- str_c("Your flight to JNB has fallen to ", input$slider2, " you should buy it now.")
+       sendmail(from, to, subject, msg)
+     }
+     else if(input$carriers == "BOTH" & cheapest[input$date2,]$min_price <= input$slider2) {
+       from <- isolate('saul.rotter@gmail.com')
+       to <- isolate(input$email)
+       subject <- "FLIGHT TO JOHANNESBURG"
+       msg <- str_c("Your flight to JNB has fallen to ", input$slider2, " you should buy it now.")
+       sendmail(from, to, subject, msg)
+     }
+   })
+   output$recentQuote <- renderText({
+     print('COMING SOON')
+   })
 }
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 # INTERFACE
 # ---------------------------------------------------------------------------------------------------------------------
-
-
 ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                          tabPanel("Price Watch", fluidPage(
                            titlePanel("Flight Oracle"),
@@ -69,14 +101,15 @@ ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                                          choices = c("Johannesburg (JNB)", "Cape Town (CPT)")),
                              
                              dateInput("date", "Travel Date:",
-                                           value = Sys.Date()+1
+                                       value = Sys.Date()+1
                              ),
                              wellPanel(
                                radioButtons("airlines", "Airlines:", c("BA", "SA", "Both"))
                              ),
                              actionButton("search", "Search")),
                            mainPanel(
-                             plotlyOutput("flights")
+                             plotlyOutput("flights"),
+                             tableOutput("view")
                            )
                          )),
                          tabPanel("Price Alert",fluidPage(
@@ -84,24 +117,18 @@ ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                            
                            p("Receive alerts when you desired flight drops below a certain price"),
                            
-                           fluidRow(column(6,textInput("text", label = h3("Email"), value = "Enter Email")),
+                           fluidRow(column(6,textInput("email", label = h3("Email"), value = "Enter Email")),
                                     
                                     column(6,sliderInput("slider2", label = h3("Price Range"), min = 0, 
-                                                         max = 1500, value = c(40, 60)))),
+                                                         max = 1500, value = 500))),
                            
-                           fluidRow(column(6,checkboxGroupInput("checkGroup", label = h3("Carrier"),inline=TRUE,
-                                                                choices = list("BA" = 1, "SA" = 2),
-                                                                selected = 1)),
-                                    
-                                    column(6,dateInput("date", label = h3("Flight Date"), value = "2014-01-01"))),
+                           fluidRow(column(6,radioButtons("carriers", "Airlines:", c("BA", "SA", "Both")),
+                                           selected = 1)),
+                           
+                           column(6,dateInput("date2", label = h3("Flight Date"), value = Sys.Date()))),
                            actionButton("action", label = "Set Alert")
                            
-                         ))))
-
-
-
-
-
+                         )))
 
 # ---------------------------------------------------------------------------------------------------------------------
 shinyApp(ui = ui, server = server)
