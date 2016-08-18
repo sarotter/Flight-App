@@ -24,6 +24,27 @@ cheapest <- flights_data %>% group_by(departure_date) %>% dplyr::summarize(
   min_price = min(price), mean_price = mean(price), median_price = median(price), mean_until_departure = mean(until_departure/24)
 )
 
+# divide the cheapest data fram by each airline
+sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
+ba_flights <- flights_data[substr(flights_data$flight_code,1,2)=="BA",]
+sa_cheapest <- ba_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
+                                                                     mean = mean(price),
+                                                                     median = median(price),
+                                                                     mean_until_departure = mean(until_departure/24)) 
+ba_cheapest <- sa_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
+                                                                     mean = mean(price),
+                                                                     median = median(price),
+                                                                     mean_until_departure = mean(until_departure/24)) 
+
+# linear regression model
+(flights.lm <- train(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, method = "lm"))
+summary(flights.lm)
+predict(flights.lm)
+points.ci <- predict(flights.lm, interval = "confidence", level = 0.95)
+points.pi <- predict(flights.lm, interval = "prediction", level = 0.95)
+
+test.accuracy(predict(flights.lm, cheapest))
+
 # decision tree model
 (flights.rpart <- train(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, method = "rpart"))
 
