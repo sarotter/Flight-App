@@ -8,6 +8,8 @@ library(ipred)
 library(e1071)
 library(rattle)
 library(vcdExtra)
+library(RSQLite)
+db <- dbConnect(dbDriver("SQLite"), dbname = "Flights.db")
 
 theme_set(theme_minimal())
 
