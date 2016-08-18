@@ -18,12 +18,13 @@ server <- function(input, output) {
     price <- cheapest$price
     date <- cheapest$departure_date
    })
+   
   output$flights <- renderPlotly({
     flightPrice <- price.data()
-    p <- plot_ly(cheapest, x=mean_until_departure, y=median_price, name = "raw") %>% 
+    p <- plot_ly(cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=mean_until_departure, y=median_price, name = "raw") %>% 
       layout(
         showLegend = F,
-        xaxis = list(title = "Days to Flight"),
+        xaxis = list(title = "Departure Date"),
         yaxis = list(title = "Price")
       )
   })
@@ -31,6 +32,7 @@ server <- function(input, output) {
     print('COMING SOON')
   })
 }
+
 # ---------------------------------------------------------------------------------------------------------------------
 # INTERFACE
 # ---------------------------------------------------------------------------------------------------------------------
@@ -49,10 +51,10 @@ ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                                          choices = c("Johannesburg (JNB)", "Cape Town (CPT)")),
                              
                              dateInput("date", "Travel Date:",
-                                       value = Sys.Date()
+                                           value = Sys.Date()+1
                              ),
-                             actionButton("search", "Search")
-                           ),
+                             
+                             actionButton("search", "Search")),
                            mainPanel(
                              plotlyOutput("flights")
                            )
@@ -61,6 +63,7 @@ ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                                   mainPanel(textOutput("recentQuote")),
                          tags$h3(class="header")
 )))
+
 
 
 
