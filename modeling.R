@@ -102,8 +102,6 @@ both_shiny$departure_time <- format(as.POSIXct(strptime(both_shiny$departure,"%Y
 both_shiny$departure <- NULL 
 both_shiny <- both_shiny %>% arrange(departure_date, price)
 
-both_shiny[,3 == Sys.Date()]
-both_shiny %>% filter(departure_date == Sys.Date())
 
 # build functions to test accuracy of the model
 test.sa.accuracy <- function(prediction) {

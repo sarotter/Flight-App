@@ -32,7 +32,7 @@ server <- function(input, output) {
    output$flights <- renderPlotly({
      flightPrice <- price.data()
      if(input$airlines == "SA") {
-       p <- plot_ly(sa_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+       p <- plot_ly(sa_cheapest[2:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
          layout(
            showLegend = F,
            xaxis = list(title = "Departure Date"),
@@ -40,7 +40,7 @@ server <- function(input, output) {
          )
      }
      else if(input$airlines == "BA") {
-       p <- plot_ly(ba_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+       p <- plot_ly(ba_cheapest[2:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
          layout(
            showLegend = F,
            xaxis = list(title = "Departure Date"),
@@ -48,7 +48,7 @@ server <- function(input, output) {
          )
      }
      else {
-       p <- plot_ly(cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+       p <- plot_ly(cheapest[2:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
          layout(
            showLegend = F,
            xaxis = list(title = "Departure Date"),
@@ -83,7 +83,6 @@ server <- function(input, output) {
      print('COMING SOON')
    })
 }
-
 
 # ---------------------------------------------------------------------------------------------------------------------
 # INTERFACE
