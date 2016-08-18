@@ -21,12 +21,30 @@ server <- function(input, output) {
    
   output$flights <- renderPlotly({
     flightPrice <- price.data()
-    p <- plot_ly(cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=mean_until_departure, y=median_price, name = "raw") %>% 
+    if(input$airlines == "SA") {
+      p <- plot_ly(sa_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+        layout(
+          showLegend = F,
+          xaxis = list(title = "Departure Date"),
+          yaxis = list(title = "Price")
+        )
+    }
+    else if(input$airlines == "BA") {
+      p <- plot_ly(ba_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+        layout(
+          showLegend = F,
+          xaxis = list(title = "Departure Date"),
+          yaxis = list(title = "Price")
+        )
+    }
+    else {
+    p <- plot_ly(cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
       layout(
         showLegend = F,
         xaxis = list(title = "Departure Date"),
         yaxis = list(title = "Price")
       )
+    }
   })
   output$recentQuote <- renderText({
     print('COMING SOON')
@@ -53,7 +71,9 @@ ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                              dateInput("date", "Travel Date:",
                                            value = Sys.Date()+1
                              ),
-                             
+                             wellPanel(
+                               radioButtons("airlines", "Airlines:", c("BA", "SA", "Both"))
+                             ),
                              actionButton("search", "Search")),
                            mainPanel(
                              plotlyOutput("flights")

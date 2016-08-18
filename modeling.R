@@ -101,13 +101,13 @@ head(cheapest_prediction)
 # divide the cheapest data fram by each airline
 sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
 ba_flights <- flights_data[substr(flights_data$flight_code,1,2)=="BA",]
-sa_cheapest <- ba_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
-                                                                     mean = mean(price),
-                                                                     median = median(price),
+sa_cheapest <- sa_flights %>% group_by(departure_date) %>% dplyr::summarise(min_price = min(price), 
+                                                                     mean_price = mean(price),
+                                                                     median_price = median(price),
                                                                      mean_until_departure = mean(until_departure/24)) 
-ba_cheapest <- sa_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
-                                                                     mean = mean(price),
-                                                                     median = median(price),
+ba_cheapest <- ba_flights %>% group_by(departure_date) %>% dplyr::summarise(min_price = min(price), 
+                                                                     mean_price = mean(price),
+                                                                     median_price = median(price),
                                                                      mean_until_departure = mean(until_departure/24)) 
 
 sa.rpart <- train(median ~ ., data = sa_cheapest, method = "rpart")
