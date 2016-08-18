@@ -24,14 +24,14 @@ server <- function(input, output) {
     }
     cache[[ticker]]
   })
-   # price.data <- eventReactive(input$search, {
-   # price <- data$price
-   # date <- data$departure
-   # })
+   price.data <- eventReactive(input$search, {
+    price <- data$price
+    date <- data$departure
+   })
   output$flights <- renderPlotly({
     # flightPrice <- price.data()
     # flightPrice <- list(flightPrice)
-    p <- plot_ly(data, x=as.numeric(as.Date(date)-Sys.Date()), y=price, name = "raw") %>% 
+    p <- plot_ly(cheapest, x=mean_until_departure, y=median, name = "raw") %>% 
       layout(
         showLegend = F,
         xaxis = list(title = "Days to Flight"),

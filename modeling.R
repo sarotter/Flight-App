@@ -9,13 +9,17 @@ library(ipred)
 theme_set(theme_minimal())
 
 # REFERENCE MODEL -----------------------------------------------------------------------------------------------------
-
+View(data)
 flights_data <- dbReadTable(db, "tb_flights")
 flights_data <- flights_data %>% mutate (
   query = as.POSIXct(query),
   departure = as.POSIXct(departure),
-  until_departure = as.double(departure - query))
-
+  until_departure = as.double(departure - query),
+  departure_date = as.Date(departure))
+cheapest<-flights_data %>% group_by(departure_date) %>% summarise(min = min(price), 
+                                                        mean = mean(price),
+                                                        median = median(price),
+                                                        mean_until_departure = mean(until_departure/24)) 
 # decision tree
 (flights.rpart <- train(price ~ ., data = flights_data, method = "rpart"))
 
