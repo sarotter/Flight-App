@@ -21,18 +21,6 @@ flights_data <- flights_data %>% mutate (
   departure = as.POSIXct(departure),
   until_departure = as.double(departure - query),
   departure_date = as.Date(departure))
-  sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
-  ba_flights <- flights_data[substr(flights_data$flight_code,1,2)=="BA",]
-  sa_cheapest <- sa_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
-                                                                       mean = mean(price),
-                                                                       median = median(price),
-                                                                       mean_until_departure = mean(until_departure/24)) 
-  ba_cheapest <- ba_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
-                                                                       mean = mean(price),
-                                                                       median = median(price),
-
-  departure_date = factor(as.Date(departure)),
-  until_departure = as.double(departure - query))
 
 # get the cheapest flight everyday
 cheapest <- flights_data %>% group_by(departure_date) %>% dplyr::summarize(
