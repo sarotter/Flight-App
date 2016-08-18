@@ -14,50 +14,43 @@ server <- function(input, output) {
     input$smooth
     message("Keeping track of smoothing...")
   })
-  stock.data <- eventReactive(input$search, {
-    ticker <- input$ticker
-    if (!(ticker %in% names(cache))) {
-      message("Data not in cache. Retrieving now.")
-      cache[[ticker]] <<- stocks <- Quandl(paste0("WIKI/", ticker), collapse = "weekly") %>%
-        dplyr::rename(date = Date, adj_close = `Adj. Close`) %>%
-        dplyr::select(date, adj_close)
-    }
-    cache[[ticker]]
-  })
-  price.data <- eventReactive(input$search, {
-    destination <- input$arrive
-    origin <- input$origin
-    date <- input$date
-  })
+   price.data <- eventReactive(input$search, {
+    price <- cheapest$price
+    date <- cheapest$departure_date
+   })
+   
   output$flights <- renderPlotly({
     flightPrice <- price.data()
-    p <- plot_ly(flightPrice, x=as.numeric(difftime(date, Sys.Date())), y=price, name = "raw") %>% 
+    if(input$airlines == "SA") {
+      p <- plot_ly(sa_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+        layout(
+          showLegend = F,
+          xaxis = list(title = "Departure Date"),
+          yaxis = list(title = "Price")
+        )
+    }
+    else if(input$airlines == "BA") {
+      p <- plot_ly(ba_cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
+        layout(
+          showLegend = F,
+          xaxis = list(title = "Departure Date"),
+          yaxis = list(title = "Price")
+        )
+    }
+    else {
+    p <- plot_ly(cheapest[1:as.numeric(difftime(input$date, Sys.Date())),], x=departure_date, y=median_price, name = "raw") %>% 
       layout(
-        showLegend = T,
-        xaxis = list(title = "Days to Flight"),
+        showLegend = F,
+        xaxis = list(title = "Departure Date"),
         yaxis = list(title = "Price")
       )
-    
-  })
-  output$stockPlot <- renderPlotly({
-    stocks <- stock.data()
-    p <- plot_ly(stocks, x = date, y = adj_close, name = "raw") %>%
-      layout(
-        showlegend = F,
-        xaxis = list(title = NA),
-        yaxis = list(title = "Adjusted Close")
-      )
-    if (input$smooth) {
-      p <- add_trace(p, y = fitted(loess(adj_close ~ as.numeric(date), span = max(input$span, 0.01))), x = date, name = "smoothed")
     }
-    p
   })
   output$recentQuote <- renderText({
-    recent <- head(stock.data(), 1)
-    #
-    sprintf("Adjusted close price on %s was %.2f.", recent$date, recent$adj_close)
+    print('COMING SOON')
   })
 }
+
 # ---------------------------------------------------------------------------------------------------------------------
 # INTERFACE
 # ---------------------------------------------------------------------------------------------------------------------
@@ -76,27 +69,21 @@ ui <- shinyUI(navbarPage(theme = shinytheme("united"), "Travel Oracle",
                                          choices = c("Johannesburg (JNB)", "Cape Town (CPT)")),
                              
                              dateInput("date", "Travel Date:",
-                                       value = Sys.Date()
+                                           value = Sys.Date()+1
                              ),
-                             selectInput("ticker", "Stock", width = NULL,
-                                         choices = c("AAPL", "AMD", "RDEN", "REV", "CYTK", "REXI", "CMA")
+                             wellPanel(
+                               radioButtons("airlines", "Airlines:", c("BA", "SA", "Both"))
                              ),
-                             checkboxInput("smooth", "Smooth", value = TRUE),
-                             # Display this only if smoothing is activated.
-                             conditionalPanel(
-                               condition = "input.smooth == true",
-                               sliderInput("span", "Smoother Span", min = 0, max = 1, value = 0.5)
-                             ),
-                             actionButton("search", "Search")
-                           ),
+                             actionButton("search", "Search")),
                            mainPanel(
-                             plotlyOutput("stockPlot"),
-                             textOutput("recentQuote")
+                             plotlyOutput("flights")
                            )
                          )),
-                         tabPanel("Airline Comparison"),
+                         tabPanel("Airline Comparison",
+                                  mainPanel(textOutput("recentQuote")),
                          tags$h3(class="header")
-))
+)))
+
 
 
 

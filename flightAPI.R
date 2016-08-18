@@ -9,7 +9,7 @@ Saul.key <- "AIzaSyBcyOApaEifsmwW1zIaKBIVfw16gGGV4Z8"
 set_apikey(Hashim.key)
 
 sapply(1:50, function(x) {
-  results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+x , returnDate = Sys.Date() + 8 + x)
+  #results <- search(origin="CPT",dest = "JNB", startDate = Sys.Date()+x , returnDate = Sys.Date() + 8 + x)
   n <- 400
   
   # get the roundtrip price
@@ -100,6 +100,7 @@ sapply(1:50, function(x) {
   priceQuery <- paste(priceQuery,collapse = ",")
   dbSendQuery(db,str_c("INSERT INTO tb_flights(price,query,departure,flight_code) VALUES ",priceQuery))
 })
+
 
 
 
