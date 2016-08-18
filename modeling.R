@@ -18,12 +18,16 @@ flights_data <- flights_data %>% mutate (
   departure = as.POSIXct(departure),
   until_departure = as.double(departure - query),
   departure_date = as.Date(departure))
-cheapest<-flights_data %>% group_by(departure_date) %>% summarise(min = min(price), 
-                                                        mean = mean(price),
-                                                        median = median(price),
-                                                        mean_until_departure = mean(until_departure/24)) 
-
-
+  sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
+  ba_flights <- flights_data[substr(flights_data$flight_code,1,2)=="BA",]
+  sa_cheapest <- sa_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
+                                                                       mean = mean(price),
+                                                                       median = median(price),
+                                                                       mean_until_departure = mean(until_departure/24)) 
+  ba_cheapest <- ba_flights %>% group_by(departure_date) %>% summarise(min = min(price), 
+                                                                       mean = mean(price),
+                                                                       median = median(price),
+                                                                       mean_until_departure = mean(until_departure/24)) 
 cheapest <- flights_data %>% group_by(departure_date) %>% dplyr::summarize(
   min_price = min(price), mean_price = mean(price), median_price = median(price), mean_until_departure = mean(until_departure/24)
 )
@@ -59,16 +63,15 @@ TRAINCONTROL = trainControl(method = "cv")
 # SVM
 (flights.svm <- train(median_price ~min_price + mean_price +mean_until_departure , data = cheapest, method = "svmRadial",
                       trControl = trainControl(method = "cv")))
-
 test.accuracy(predict(flights.svm, cheapest))
 
 predict(flights.svm, try.frame)
 
 
 try.frame <- data.frame(
-                        min_price = min(cheapest$min_price), 
-                        mean_price = mean(cheapest$mean_price),
-                        mean_until_departure = 50 + 1)
+  min_price = min(cheapest$min_price), 
+  mean_price = mean(cheapest$mean_price),
+  mean_until_departure = 50 + 1)
 
 cheapest_prediction  <- cheapest
 
@@ -84,3 +87,7 @@ sapply(1:50, function(x) {
 cheapest_prediction[51,1] = cheapest_prediction[50,1]
 cheapest_prediction[51,2] = min(cheapest_prediction$min_price)
 head(cheapest_prediction)
+
+#PREDICTIONS SA
+sa.rpart <- train(median ~ ., data = sa_cheapest, method = "rpart")
+
