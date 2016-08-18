@@ -71,6 +71,7 @@ TRAINCONTROL = trainControl(method = "cv")
 test.accuracy(predict(flights.svm, cheapest))
 
 predict(flights.svm, try.frame)
+View(flights_data)
 
 
 try.frame <- data.frame(
@@ -82,20 +83,20 @@ cheapest_prediction  <- cheapest
 
 
 
-# sapply(1:50, function(x) {
-#   departure_date_prediction[x] = cheapest_prediction[50,1]
-#   min_price_prediction[x] = min(cheapest_prediction$min_price)
-#   cheapest_prediction[50+x,2] = min(cheapest_prediction$min_price)
-#   cheapest_prediction[50+x,3] = mean(cheapest_prediction$mean_price)
-#   cheapest_prediction[50+x,5] = 50 + x
-#   cheapest_prediction[50+x,4] = predict(flights.svm, cheapest_prediction[50 + x,])
-# })
-# cheapest_prediction[51,1] = cheapest_prediction[50,1]
-# cheapest_prediction[51,2] = min(cheapest_prediction$min_price)
-# head(cheapest_prediction)
+sapply(1:50, function(x) {
+  departure_date_prediction[x] = cheapest_prediction[50,1]
+  min_price_prediction[x] = min(cheapest_prediction$min_price)
+  cheapest_prediction[50+x,2] = min(cheapest_prediction$min_price)
+  cheapest_prediction[50+x,3] = mean(cheapest_prediction$mean_price)
+  cheapest_prediction[50+x,5] = 50 + x
+  cheapest_prediction[50+x,4] = predict(flights.svm, cheapest_prediction[50 + x,])
+})
+cheapest_prediction[51,1] = cheapest_prediction[50,1]
+cheapest_prediction[51,2] = min(cheapest_prediction$min_price)
+head(cheapest_prediction)
 
 
-
+?train
 #PREDICTIONS BY AIRLINE
 # divide the cheapest data fram by each airline
 sa_flights <- flights_data[substr(flights_data$flight_code,1,2)=="SA",]
