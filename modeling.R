@@ -16,14 +16,13 @@ flights_data <- dbReadTable(db, "tb_flights")
 flights_data <- flights_data %>% mutate (
   query = as.POSIXct(query),
   departure = as.POSIXct(departure),
-<<<<<<< HEAD
   until_departure = as.double(departure - query),
   departure_date = as.Date(departure))
 cheapest<-flights_data %>% group_by(departure_date) %>% summarise(min = min(price), 
                                                         mean = mean(price),
                                                         median = median(price),
                                                         mean_until_departure = mean(until_departure/24)) 
-=======
+
   departure_date = factor(as.Date(departure)),
   until_departure = as.double(departure - query))
 
@@ -32,7 +31,6 @@ cheapest <- flights_data %>% group_by(departure_date) %>% dplyr::summarize(
   min_price = min(price), mean_price = mean(price), median_price = median(price), mean_until_departure = mean(until_departure/24)
 )
 
->>>>>>> c7ab9b006dbd4e9ffa554e125f2d1fbff4c498de
 # decision tree
 (flights.rpart <- train(median_price ~ ., data = cheapest, method = "rpart"))
 
