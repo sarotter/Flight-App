@@ -12,7 +12,6 @@ library(RSQLite)
 db <- dbConnect(dbDriver("SQLite"), dbname = "Flights.db")
 
 theme_set(theme_minimal())
-
 # REFERENCE MODEL -----------------------------------------------------------------------------------------------------
 View(data)
 flights_data <- dbReadTable(db, "tb_flights")
@@ -58,7 +57,11 @@ test.accuracy(predict(flights.bagging, cheapest))
 (flights.forest <- train(median_price ~ min_price + mean_price + mean_until_departure , data = cheapest, method = "rf", ntree = 100,
                           tuneGrid = expand.grid(mtry = 2^(1:3))))
 
-test.accuracy(predict(flights.forest, cheapest))
+test.accuracy(predict(flights.forest, cheapest)) # 68% for both
+both.prediction <- as.data.frame(predict(flights.forest, cheapest))
+both.prediction <- both.prediction %>% mutate (
+  Predicted_price = predict(flights.forest, cheapest),
+  Days_until_departure = 1:50)
 
 # Naive Bayes model
 TRAINCONTROL = trainControl(method = "cv")
@@ -130,7 +133,9 @@ test.sa.accuracy(predict(flights.sa.rpart, sa_cheapest))
 
 (flights.ba.rpart <- train(median_price ~ mean_until_departure , data = ba_cheapest, method = "rpart"))
 fancyRpartPlot(flights.ba.rpart$finalModel)
-test.ba.accuracy(predict(flights.ba.rpart, ba_cheapest))
+test.ba.accuracy(predict(flights.ba.rpart, ba_cheapest)) # BA prediction of 30%
+
+
 
 # bagging model
 (flights.sa.bagging <- bagging(median_price ~ mean_until_departure , data = sa_cheapest, coob = TRUE, nbagg = 50))
@@ -146,7 +151,13 @@ test.sa.accuracy(predict(flights.sa.forest, sa_cheapest))
 
 (flights.ba.forest <- train(median_price ~ mean_until_departure , data = ba_cheapest, method = "rf", ntree = 100,
                             tuneGrid = expand.grid(mtry = 2^(1:3))))
-test.ba.accuracy(predict(flights.ba.forest, ba_cheapest))
+test.ba.accuracy(predict(flights.ba.forest, ba_cheapest)) # BA prediction of 34%
+ba.prediction <- predict(flights.ba.forest, ba_cheapest)
+
+ba.prediction <- as.data.frame(predict(flights.ba.forest, ba_cheapest))
+ba.prediction <- ba.prediction %>% mutate (
+  Predicted_price = predict(flights.ba.forest, ba_cheapest),
+  Days_until_departure = 1:50)
 
 # SVM 
 (flights.sa.svm <- train(median_price ~ mean_until_departure , data = sa_cheapest, method = "svmRadial",
@@ -156,3 +167,10 @@ test.sa.accuracy(predict(flights.sa.svm, sa_cheapest))
 (flights.ba.svm <- train(median_price ~ mean_until_departure , data = ba_cheapest, method = "svmRadial",
                          trControl = trainControl(method = "cv")))
 test.ba.accuracy(predict(flights.ba.svm, ba_cheapest))
+
+sa.prediction <- as.data.frame(predict(flights.sa.svm, sa_cheapest))
+sa.prediction <- sa.prediction %>% mutate (
+  Predicted_price = predict(flights.sa.svm, sa_cheapest),
+  Days_until_departure = 1:50)
+
+View(sa.prediction)
